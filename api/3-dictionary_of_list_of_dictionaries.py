@@ -1,29 +1,36 @@
 #!/usr/bin/python3
-"""Gather user's todo from API."""
+""" getting todo list of users from  api  """
+
 import json
-import requests as r
+import requests
+
 
 if __name__ == "__main__":
-    user_data = r.get(f'https://jsonplaceholder.typicode.com/users').json()
-    # Get user data from API
-    todo_list = r.get('https://jsonplaceholder.typicode.com/todos').json() 
-    # Get list of all todos from API
-    user_tasks = []
-    user_dict = {}  # Initialize a dictionary to store user tasks
+    """ getting todo list of users from an api  """
+    res_User = requests.get('https://jsonplaceholder.typicode.com/users')
+    is_response = res_User.json()
+    resTask = requests.get('https://jsonplaceholder.typicode.com/todos')
+    response_Task = resTask.json()
 
-    with open("todo_all_employees.json", "w") as file:
-        for u in user_data:
-            user_id = int(u["id"])
-            user_tasks = []  # Reset the user_tasks list for each user
-            for t in todo_list:
-                if t["userId"] == user_id:
-                    user_tasks.append({
-                        "task": t["title"],
-                        "completed": t["completed"],
-                        "username": u["username"]
-                    })
-            user_dict[str(user_id)] = user_tasks 
-            # Store user tasks in the dictionary
+    json_file = "todo_all_employees.json"
+    tasklist = []
+    a_user = []
+    all_users = []
+    new_dict = {}
+    for user in is_response:
+        USER_ID = int(user["id"])
+        tasklist = []
+        for task in response_Task:
+            if int(task["userId"]) == USER_ID:
+                TASK_TITLE = task['title']
+                TASK_COMPLETED_STATUS = task["completed"]
+                USERNAME = user["username"]
 
-        json.dump(user_dict, file)  
-        # Write the user tasks dictionary to the JSON file
+                tasklist.append({
+                    "username": USERNAME,
+                    "task": TASK_TITLE,
+                    "completed": TASK_COMPLETED_STATUS
+                })
+        new_dict[USER_ID] = tasklist
+        with open(json_file, "w") as jfile:
+            json.dump(new_dict, jfile)
